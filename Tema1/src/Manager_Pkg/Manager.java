@@ -2,13 +2,13 @@ package Manager_Pkg;
 
 import Cofetar_Pkg.Cofetar;
 import Comanda_Pkg.Comanda;
+import Comanda_Pkg.Comanda_ML;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 
@@ -17,21 +17,24 @@ public class Manager extends Thread {
     private final ThreadPoolExecutor Cofetari_Blat_Executor;
     private final ThreadPoolExecutor Cofetari_Crema_Executor;
     private final ThreadPoolExecutor Cofetari_Decoratiuni_Executor;
-    private final SynchronousQueue<Comanda> ListaComenzi_Manageri_Livratori;
+
+    private final Comanda_ML<Comanda> Lista_ML;
+
     private final Lock Lacat;
+
     private final ArrayList<String> ElementeMarcate;
     private final ArrayList<String> Threaduri;
     private final ArrayList<String> Livratori;
     private final ArrayList<String> Manageri;
 
-    public Manager(ArrayDeque<Comanda> listaComenzi_Agent_Manageri, ThreadPoolExecutor cofetari_Blat_Executor, ThreadPoolExecutor cofetari_Crema_Executor, ThreadPoolExecutor cofetari_Decoratiuni_Executor, SynchronousQueue<Comanda> listaComenzi_Manageri_Livratori, Lock lacat, ArrayList<String> elementeMarcate) {
+    public Manager(ArrayDeque<Comanda> listaComenzi_Agent_Manageri, ThreadPoolExecutor cofetari_Blat_Executor, ThreadPoolExecutor cofetari_Crema_Executor, ThreadPoolExecutor cofetari_Decoratiuni_Executor, Comanda_ML<Comanda> lista_ML, Lock lacat, ArrayList<String> elementeMarcate) {
         ListaComenzi_Agent_Manageri = listaComenzi_Agent_Manageri;
 
         Cofetari_Blat_Executor = cofetari_Blat_Executor;
         Cofetari_Crema_Executor = cofetari_Crema_Executor;
         Cofetari_Decoratiuni_Executor = cofetari_Decoratiuni_Executor;
 
-        ListaComenzi_Manageri_Livratori = listaComenzi_Manageri_Livratori;
+        Lista_ML = lista_ML;
 
         Lacat = lacat;
 
@@ -88,7 +91,7 @@ public class Manager extends Thread {
                         Lacat.lock();
                         while (!ElementeMarcate.containsAll(Livratori)) {
                             // Cat timp livratorii sunt activi, pun comanda de oprire pe coada Manageri - Livratori
-                            ListaComenzi_Manageri_Livratori.put(comanda);
+                            Lista_ML.put(comanda);
                         }
                         Lacat.unlock();
                     } else {
@@ -108,9 +111,12 @@ public class Manager extends Thread {
             String rezultat_crema = crema.get();
             String rezultat_decoratiuni = decoratiuni.get();
 
-            // Tortul este gata si se poate livra
-            ListaComenzi_Manageri_Livratori.put(comanda);
-            // Fiind folosita o coada SynchronousQueue call-ul precedent este unul blocant si asteapta pana cand un livrator preia comanda
+            // Exista livrator liber si managerul plaseaza comanda spre livrare
+            Lista_ML.put(comanda);
+
+            Lacat.lock();
+            System.err.println("Managerul " + Thread.currentThread().getName() + " a dat comanda " + comanda.getNume() + " spre livrare.");
+            Lacat.unlock();
         }
     }
 }

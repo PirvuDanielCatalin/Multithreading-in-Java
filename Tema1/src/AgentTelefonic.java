@@ -1,4 +1,5 @@
 import Comanda_Pkg.Comanda;
+import Comanda_Pkg.Comanda_ML;
 import Livrator_Pkg.Livrator;
 import Manager_Pkg.Manager;
 
@@ -9,14 +10,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class AgentTelefonic {
     static ArrayDeque<Comanda> ListaComenzi_Agent_Manageri;
-    static SynchronousQueue<Comanda> ListaComenzi_Manageri_Livratori;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         ArrayList<String> Threaduri = new ArrayList<String>(Arrays.asList("M1", "M2", "M3", "M4", "CB", "CC", "CD", "L1", "L2", "L3", "L4", "L5"));
@@ -24,7 +23,7 @@ class AgentTelefonic {
         ArrayList<String> ElementeMarcate = new ArrayList<>(12);
 
         ListaComenzi_Agent_Manageri = new ArrayDeque<>(4);
-        ListaComenzi_Manageri_Livratori = new SynchronousQueue<>();
+        Comanda_ML<Comanda> Lista_ML = new Comanda_ML<>();
 
         ThreadPoolExecutor Cofetari_Blat_Executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
         ThreadPoolExecutor Cofetari_Crema_Executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
@@ -32,11 +31,11 @@ class AgentTelefonic {
 
         Lock Lacat = new ReentrantLock();
 
-        Thread Livrator1 = new Thread(new Livrator(ListaComenzi_Manageri_Livratori, ElementeMarcate), "L1");
-        Thread Livrator2 = new Thread(new Livrator(ListaComenzi_Manageri_Livratori, ElementeMarcate), "L2");
-        Thread Livrator3 = new Thread(new Livrator(ListaComenzi_Manageri_Livratori, ElementeMarcate), "L3");
-        Thread Livrator4 = new Thread(new Livrator(ListaComenzi_Manageri_Livratori, ElementeMarcate), "L4");
-        Thread Livrator5 = new Thread(new Livrator(ListaComenzi_Manageri_Livratori, ElementeMarcate), "L5");
+        Thread Livrator1 = new Thread(new Livrator(Lista_ML, Lacat, ElementeMarcate), "L1");
+        Thread Livrator2 = new Thread(new Livrator(Lista_ML, Lacat, ElementeMarcate), "L2");
+        Thread Livrator3 = new Thread(new Livrator(Lista_ML, Lacat, ElementeMarcate), "L3");
+        Thread Livrator4 = new Thread(new Livrator(Lista_ML, Lacat, ElementeMarcate), "L4");
+        Thread Livrator5 = new Thread(new Livrator(Lista_ML, Lacat, ElementeMarcate), "L5");
 
         Livrator1.start();
         Livrator2.start();
@@ -44,10 +43,10 @@ class AgentTelefonic {
         Livrator4.start();
         Livrator5.start();
 
-        Thread Manager1 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, ListaComenzi_Manageri_Livratori, Lacat, ElementeMarcate), "M1");
-        Thread Manager2 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, ListaComenzi_Manageri_Livratori, Lacat, ElementeMarcate), "M2");
-        Thread Manager3 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, ListaComenzi_Manageri_Livratori, Lacat, ElementeMarcate), "M3");
-        Thread Manager4 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, ListaComenzi_Manageri_Livratori, Lacat, ElementeMarcate), "M4");
+        Thread Manager1 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, Lista_ML, Lacat, ElementeMarcate), "M1");
+        Thread Manager2 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, Lista_ML, Lacat, ElementeMarcate), "M2");
+        Thread Manager3 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, Lista_ML, Lacat, ElementeMarcate), "M3");
+        Thread Manager4 = new Thread(new Manager(ListaComenzi_Agent_Manageri, Cofetari_Blat_Executor, Cofetari_Crema_Executor, Cofetari_Decoratiuni_Executor, Lista_ML, Lacat, ElementeMarcate), "M4");
 
         Manager1.start();
         Manager2.start();
